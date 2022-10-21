@@ -55,3 +55,45 @@ svar:
 */
 
 --Oppgave 5
+--TODO vise genre ogsaa!!
+SELECT country, count(country) AS films, avg(rank) AS avg_rating
+FROM film
+    INNER JOIN filmcountry USING (filmid)
+    INNER JOIN filmrating USING (filmid)
+GROUP BY country
+ORDER BY country
+;
+--svar: 172 rows??? Fasit sier 77 rader. Det må da være en rad for hvert land?
+
+--Delspørring for oppgave 5
+SELECT country, genre, count(*)
+            FROM filmcountry
+                INNER JOIN filmgenre USING (filmid)
+            GROUP BY country, genre
+            ORDER BY country, count DESC
+
+
+--Oppgave 6 - Vennskap
+--TODO fjerne duplikater
+SELECT *
+
+FROM (
+    WITH p AS (
+        SELECT concat(firstname, ' ', lastname) AS name, filmid
+        FROM film
+        INNER JOIN filmcountry USING (filmid)
+        INNER JOIN filmparticipation AS fp USING (filmid)
+        INNER JOIN person USING (personid)
+        WHERE country = 'Norway' --AND fp.parttype = 'cast'
+    )
+
+        SELECT p1.name, p2.name, count(*) AS films_together
+        FROM p AS p1 
+            INNER JOIN p AS p2 ON p1.filmid = p2.filmid AND p1.name != p2.name
+        GROUP BY p1.name, p2.name
+) AS actors_in_same_films
+
+ORDER BY films_together DESC
+;
+--Her ffaar jeg kun opp to svar hvis vi tar vekk parttype cast?
+--Dvs. at de som har jobbet i mer enn 40 filmer sammen ikke er skuepsillere.
