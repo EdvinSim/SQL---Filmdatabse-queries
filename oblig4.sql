@@ -21,10 +21,9 @@ ORDER BY count(*) DESC
 
 
 --Oppgave 3 - Spilletider
---TODO oppgaven sier hvor country ikke er lik NULL
 SELECT country, avg(cast(time AS int))
 FROM runningtime
-WHERE time ~ '^\d+$' AND country != ' ' --Her funket det ikke aa skrive NULL
+WHERE time ~ '^\d+$' AND country != '' --Her funket det ikke aa skrive NULL. Oppgaven sier hvor country ikke er lik NULL
 GROUP BY country HAVING count(time) >= 200
 ;
 --svar: 44
@@ -55,6 +54,7 @@ svar:
 */
 
 --Oppgave 5
+--Her er det lavere antall filmer i hvert land enn i oppgave 2. Fordi noen filmer ikke har noen rating?
 --TODO vise genre ogsaa!!
 SELECT country, count(country) AS films, avg(rank) AS avg_rating
 FROM filmcountry
@@ -62,7 +62,7 @@ FROM filmcountry
 GROUP BY country
 ORDER BY country
 ;
---svar: 173 rows??? Fasit sier 77 rader. Det må da være en rad for hvert land?
+--svar: 173 rows??? Fasit paa discorse sier sier 172 rader.
 
 --Table with country, genres and number og movies in each genre for each country.
 WITH country_genre_count AS (
@@ -73,13 +73,9 @@ WITH country_genre_count AS (
     ORDER BY country, count DESC
 )
 
---Tror dette er utfor pensum??
-SELECT country, genre AS most_popular_genre
-FROM (
-    SELECT country, genre, row_number() OVER (PARTITION BY country ORDER BY genre DESC) AS roworder
-    FROM country_genre_count
-) AS tmp
-WHERE roworder = 1
+SELECT country, max(count)
+FROM country_genre_count
+GROUP BY country
 ;
 
 
