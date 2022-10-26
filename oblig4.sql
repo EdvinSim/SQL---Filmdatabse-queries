@@ -62,7 +62,7 @@ FROM filmcountry
 GROUP BY country
 ORDER BY country
 ;
---svar: 173 rows??? Fasit paa discorse sier sier 172 rader.
+--Svar: 173 rows??? Fasit paa discorse sier sier 172 rader.
 
 --Table with country, genres and number og movies in each genre for each country.
 WITH country_genre_count AS (
@@ -105,5 +105,11 @@ FROM (
 WHERE films_together >= 40
 ORDER BY films_together DESC
 ;
---Her faar jeg kun opp 2 svar, slik fasit sier, hvis vi tar vekk fp.parttype cast?
---Dvs. at de som har jobbet i mer enn 40 filmer sammen ikke er skuepsillere?
+--Svar:
+/*
+      name       |      name      | films_together
+-----------------+----------------+----------------
+ Petter Vennerød | Svend Wam      |             47
+ Knut Bohwim     | Per A. Anonsen |             42
+(2 rows)
+*/
