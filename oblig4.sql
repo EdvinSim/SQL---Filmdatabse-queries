@@ -111,9 +111,10 @@ FROM (
         SELECT concat(firstname, ' ', lastname) AS name, filmid
         FROM film
             INNER JOIN filmcountry USING (filmid)
-            INNER JOIN filmparticipation AS fp USING (filmid)
+            INNER JOIN filmparticipation USING (filmid)
+            INNER JOIN filmitem AS fi USING (filmid)
             INNER JOIN person USING (personid)
-        WHERE country = 'Norway' --AND fp.parttype = 'cast'
+        WHERE country = 'Norway' AND fi.filmtype = 'C'
         ORDER BY name
     )
 
@@ -142,9 +143,8 @@ ORDER BY films_together DESC
 --DEL 2
 
 --OPPGAVE 7 - Mot
-SELECT title, year
+SELECT title, prodyear
 FROM film
-    INNER JOIN filmdescription USING (filmid)
     LEFT JOIN filmgenre USING (filmid)
     LEFT JOIN filmcountry USING (filmid)
 WHERE (title LIKE '%Dark%' OR title LIKE '%Night%')
