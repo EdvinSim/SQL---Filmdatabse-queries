@@ -86,6 +86,7 @@ FROM country_genre_count AS c
 )
 
 --Table with number of films, avrage filmrating and most popular genre for each country.
+--Some countries have films with no rating or no most popular genre.
 SELECT country, films, avg_rating, min(most_popular_genre) AS most_popular_genre
 FROM (
     SELECT country, count(country) AS films, avg(rank) AS avg_rating
@@ -94,12 +95,11 @@ FROM (
     GROUP BY country
     ORDER BY films DESC
 ) AS films_and_avgRating
-    INNER JOIN country_most_pop_genre USING (country)
+    LEFT JOIN country_most_pop_genre USING (country)  --This LEFT JOIN includes country with no most_popular_genre
 
---TODO finne en bedre losning? For her velges bare den som er alfabetisk forst.
 GROUP BY country, films, avg_rating --Some countries have more then one most_popular_genre. This reduces it to only one genre.
 ;
---Svar: 187 rows. Fasit paa discorse sier sier 172 eller 190 rader. Her er det med land med filmer uten rating, men ikek med land med 0 filmer.
+--Svar: 190 rows. Her er det med land med filmer uten rating, men land med 0 filmer er ikke med.
 
 
 
@@ -154,23 +154,15 @@ WHERE (title LIKE '%Dark%' OR title LIKE '%Night%')
 
 
 --OPPGAVE 8 - Lunsj
-SELECT title, count
+--filmid and number of participants
+SELECT title, count(*)
 FROM film
-    INNER JOIN (
-
-        --filmid and number of participants
-        SELECT filmid, count(*)
-        FROM film
-            INNER JOIN filmdescription USING (filmid)
-            LEFT JOIN filmparticipation USING (filmid)
-        WHERE year >= '2010'
-        GROUP BY filmid, title
-        ORDER BY count
-
-    ) AS num USING (filmid)
-WHERE count <= 2
+    LEFT JOIN filmparticipation USING (filmid)
+WHERE prodyear >= 2010
+GROUP BY filmid, title HAVING count(*) <= 2
+ORDER BY title
 ;
---Svar: 7 rows??? Fasit sier 28.
+--Svar: 28 rows.
 
 
 --OPPGAVE 9 - Introspeksjon
@@ -182,3 +174,54 @@ WHERE genre != 'Sci-Fi' AND genre != 'Horror'
 
 
 --OPPGAVE 10 - Kompetanseheving 
+
+--Films with Harrison Ford.
+WITH hf AS (
+    SELECT DISTINCT filmid
+    FROM filmparticipation
+        INNER JOIN person USING (personid)
+    WHERE firstname = 'Harrison' AND lastname = 'Ford'
+)
+
+--Films with genre Comedy or Romance
+, cd AS (
+    SELECT DISTINCT filmid
+    FROM filmgenre
+    WHERE genre = 'Comedy' OR genre = 'Romance'
+)
+
+--Top 10 films
+, top10 AS (
+    SELECT filmid
+    FROM filmrating AS fr
+        INNER JOIN (
+
+            --Distinct rank with max value
+            SELECT rank, max(votes) AS votes
+            FROM filmrating
+            WHERE rank >= 8 AND votes >= 1000
+            GROUP BY rank
+            ORDER BY rank DESC
+
+    ) AS r ON fr.rank = r.rank AND fr.votes = r.votes
+    LIMIT 10
+)
+
+--Films number of languages
+, num_languages AS (
+    SELECT filmid, count(*) AS num_of_languages
+    FROM filmlanguage
+    GROUP BY filmid
+)
+
+--SELECT title, num_of_languages, rank, votes
+SELECT title, num_of_languages
+FROM hf
+    FULL OUTER JOIN cd  USING (filmid)
+    FULL OUTER JOIN top10 USING (filmid)
+    LEFT JOIN num_languages USING (filmid)
+    INNER JOIN film USING (filmid)
+    INNER JOIN filmrating USING (filmid)
+    WHERE rank >= 8 AND votes >= 1000
+;
+--Svar: 181 rows?? Fasit sier 170. Det er 170 bare med riktig genre.
