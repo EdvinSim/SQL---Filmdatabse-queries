@@ -86,7 +86,7 @@ FROM country_genre_count AS c
 )
 
 --Table with number of films, avrage filmrating and most popular genre for each country.
-SELECT *
+SELECT country, films, avg_rating, min(most_popular_genre) AS most_popular_genre
 FROM (
     SELECT country, count(country) AS films, avg(rank) AS avg_rating
     FROM filmcountry
@@ -95,10 +95,11 @@ FROM (
     ORDER BY films DESC
 ) AS films_and_avgRating
     INNER JOIN country_most_pop_genre USING (country)
-;
---Svar: 199 rows??? Fasit paa discorse sier sier 172 eller 190 rader. Noen land har likt antall mest pop genre!
 
---Spør om: Noen land har flere most_pop_genre.
+--TODO finne en bedre losning? For her velges bare den som er alfabetisk forst.
+GROUP BY country, films, avg_rating --Some countries have more then one most_popular_genre. This reduces it to only one genre.
+;
+--Svar: 187 rows. Fasit paa discorse sier sier 172 eller 190 rader. Her er det med land med filmer uten rating, men ikek med land med 0 filmer.
 
 
 
