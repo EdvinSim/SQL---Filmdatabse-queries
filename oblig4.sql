@@ -236,7 +236,7 @@ WITH hf AS (
     GROUP BY filmid
 )
 
-SELECT title, num_of_languages, rank, votes
+SELECT title, num_of_languages
 FROM hf
     FULL OUTER JOIN cd USING (filmid)
     FULL OUTER JOIN top10 USING(filmid)
@@ -246,6 +246,4 @@ FROM hf
     WHERE rank > 8 AND votes > 1000
 ;
 --Svar: 125 rows?? Fasit sier 170.
-
---Det er 161 med riktig genre, og 8 filmer med HF pluss de top_10. 
---Det blir 179. Hva er galt her?
+--Det er 161 med riktig genre + 8 filmer med HF + de top_10 = 179. Hva er galt her?
