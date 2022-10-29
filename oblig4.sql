@@ -143,14 +143,15 @@ ORDER BY films_together DESC
 --DEL 2
 
 --OPPGAVE 7 - Mot
-SELECT title, prodyear
+--Without DISTINCT here there will be some film duplicates beacause a film occurs more than one time in filmgenre if it has more than one genre.
+SELECT DISTINCT title, prodyear
 FROM film
     LEFT JOIN filmgenre USING (filmid)
     LEFT JOIN filmcountry USING (filmid)
 WHERE (title LIKE '%Dark%' OR title LIKE '%Night%')
     AND (genre = 'Horror' OR country = 'Romania')
 ;
---Svar: 498 rows??? fasit sier 457.
+--Svar: 457 rows.
 
 
 --OPPGAVE 8 - Lunsj
@@ -166,11 +167,30 @@ ORDER BY title
 
 
 --OPPGAVE 9 - Introspeksjon
-SELECT count(*)
-FROM filmgenre
-WHERE genre != 'Sci-Fi' AND genre != 'Horror'
+SELECT count(filmid)
+FROM film --Because there are movies with no genre also.
+WHERE filmid NOT IN(
+    SELECT DISTINCT filmid
+    FROM filmgenre
+    WHERE genre = 'Sci-Fi' OR genre = 'Horror'
+)
 ;
---Svar: 661869 filmer
+--Svar: 675422 filmer. Dette kan ikke vaere riktig? Antall filmer fra den indre sporringen er 18496.
+--Da skal totalt antall filmer vaere 693618 og det stemmer ikke. Antall filmer i tabellen film er 692361.
+
+--NOT IN er kanskje ikke pensum? Her er samme sporring bare med EXCEPT i stedenfor.
+--Men er det ikke enklere å bruke NOT IN?
+SELECT count(filmid)
+FROM (
+    SELECT filmid FROM film
+EXCEPT
+    SELECT DISTINCT filmid
+    FROM filmgenre
+    WHERE genre = 'Sci-Fi' OR genre = 'Horror'
+) AS ids
+;
+--Svar: 675422 filmer. Samme greie her.
+
 
 
 --OPPGAVE 10 - Kompetanseheving 
@@ -204,24 +224,28 @@ WITH hf AS (
             ORDER BY rank DESC
 
     ) AS r ON fr.rank = r.rank AND fr.votes = r.votes
+    ORDER BY r.rank DESC
     LIMIT 10
 )
 
---Films number of languages
+--Films number of languages. Includes where there are 0 languages.
 , num_languages AS (
-    SELECT filmid, count(*) AS num_of_languages
-    FROM filmlanguage
+    SELECT filmid, count(language) AS num_of_languages
+    FROM film
+        LEFT JOIN filmlanguage USING (filmid)
     GROUP BY filmid
 )
 
---SELECT title, num_of_languages, rank, votes
-SELECT title, num_of_languages
+SELECT title, num_of_languages, rank, votes
 FROM hf
-    FULL OUTER JOIN cd  USING (filmid)
-    FULL OUTER JOIN top10 USING (filmid)
-    LEFT JOIN num_languages USING (filmid)
+    FULL OUTER JOIN cd USING (filmid)
+    FULL OUTER JOIN top10 USING(filmid)
+    INNER JOIN num_languages USING (filmid)
     INNER JOIN film USING (filmid)
     INNER JOIN filmrating USING (filmid)
-    WHERE rank >= 8 AND votes >= 1000
+    WHERE rank > 8 AND votes > 1000
 ;
---Svar: 181 rows?? Fasit sier 170. Det er 170 bare med riktig genre.
+--Svar: 125 rows?? Fasit sier 170.
+
+--Det er 161 med riktig genre, og 8 filmer med HF pluss de top_10. 
+--Det blir 179. Hva er galt her?
