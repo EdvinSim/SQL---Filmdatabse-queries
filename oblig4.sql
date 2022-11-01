@@ -178,6 +178,8 @@ WHERE filmid NOT IN(
 --Svar: 675422 filmer. Dette kan ikke vaere riktig? Antall filmer fra den indre sporringen er 18496.
 --Da skal totalt antall filmer vaere 693618 og det stemmer ikke. Antall filmer i tabellen film er 692361.
 
+
+
 --NOT IN er kanskje ikke pensum? Her er samme sporring bare med EXCEPT i stedenfor.
 --Men er det ikke enklere å bruke NOT IN?
 SELECT count(filmid)
