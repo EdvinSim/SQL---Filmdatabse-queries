@@ -175,10 +175,13 @@ WHERE filmid NOT IN(
     WHERE genre = 'Sci-Fi' OR genre = 'Horror'
 )
 ;
---Svar: 675422 filmer. Dette kan ikke vaere riktig?
---Antall filmer fra den indre sporringen er 18496.
---Da skal totalt antall filmer vaere 693918 og det stemmer ikke.
---Antall filmer i tabellen film er 692361. Da skal svaret vaere 673865.
+--Svar: 675422 filmer.
+/*
+Dette kan ikke vaere riktig?
+Antall filmer fra den indre sporringen er 18496.
+Da skal totalt antall filmer vaere 693918 og det stemmer ikke.
+Antall filmer i tabellen film er 692361. Da skal svaret vaere 673865.
+*/
 
 
 --Samme oppgave men med EXCEPT
@@ -257,6 +260,8 @@ FROM hf
     ORDER BY title
 ;
 --Svar: 174 rows? Fasit sier 170.
---I opgaven staar det "Hoyere rank enn 8 og mer enn 100 votes"
---, men hvis vi skal faa et svar som er i naerheten av fasit maa jeg bruke >=.
---Det er 161 med riktig genre + 8 filmer med HF + de top_10 = 179. Hva er galt her?
+/*
+I oppgaven staar det "Hoyere rank enn 8 og mer enn 100 votes", men hvis
+jeg har valgt aa bruke >=.
+Det er 161 med riktig genre + 8 filmer med HF + de top_10 = 179. Hva er galt her?
+*/
