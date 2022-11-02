@@ -175,12 +175,13 @@ WHERE filmid NOT IN(
     WHERE genre = 'Sci-Fi' OR genre = 'Horror'
 )
 ;
---Svar: 675422 filmer. Dette kan ikke vaere riktig? Antall filmer fra den indre sporringen er 18496.
---Da skal totalt antall filmer vaere 693618 og det stemmer ikke. Antall filmer i tabellen film er 692361.
+--Svar: 675422 filmer. Dette kan ikke vaere riktig?
+--Antall filmer fra den indre sporringen er 18496.
+--Da skal totalt antall filmer vaere 693918 og det stemmer ikke.
+--Antall filmer i tabellen film er 692361. Da skal svaret vaere 673865.
 
 
-
---NOT IN er kanskje ikke pensum? Her er samme sporring bare med EXCEPT i stedenfor.
+--Samme oppgave men med EXCEPT
 --Men er det ikke enklere å bruke NOT IN?
 SELECT count(filmid)
 FROM (
@@ -195,12 +196,21 @@ EXCEPT
 
 
 
---OPPGAVE 10 - Kompetanseheving 
+--OPPGAVE 10 - Kompetanseheving
+
+--Interresting movies
+WITH intFilms AS (
+    SELECT filmid, rank, votes
+    FROM filmrating
+        INNER JOIN filmitem USING (filmid)
+    WHERE rank >= 8 AND votes >= 1000 AND filmtype = 'C'
+)
 
 --Films with Harrison Ford.
-WITH hf AS (
+, hf AS (
     SELECT DISTINCT filmid
-    FROM filmparticipation
+    FROM intFilms
+        INNER JOIN filmparticipation USING (filmid)
         INNER JOIN person USING (personid)
     WHERE firstname = 'Harrison' AND lastname = 'Ford'
 )
@@ -208,20 +218,20 @@ WITH hf AS (
 --Films with genre Comedy or Romance
 , cd AS (
     SELECT DISTINCT filmid
-    FROM filmgenre
+    FROM intFilms
+        INNER JOIN filmgenre USING (filmid)
     WHERE genre = 'Comedy' OR genre = 'Romance'
 )
 
 --Top 10 films
 , top10 AS (
     SELECT filmid
-    FROM filmrating AS fr
+    FROM intFilms AS fr
         INNER JOIN (
 
             --Distinct rank with max value
             SELECT rank, max(votes) AS votes
-            FROM filmrating
-            WHERE rank >= 8 AND votes >= 1000
+            FROM intFilms
             GROUP BY rank
             ORDER BY rank DESC
 
@@ -233,7 +243,7 @@ WITH hf AS (
 --Films number of languages. Includes where there are 0 languages.
 , num_languages AS (
     SELECT filmid, count(language) AS num_of_languages
-    FROM film
+    FROM intFilms
         LEFT JOIN filmlanguage USING (filmid)
     GROUP BY filmid
 )
@@ -241,11 +251,12 @@ WITH hf AS (
 SELECT title, num_of_languages
 FROM hf
     FULL OUTER JOIN cd USING (filmid)
-    FULL OUTER JOIN top10 USING(filmid)
+    FUlL OUTER JOIN top10 USING(filmid)
     INNER JOIN num_languages USING (filmid)
     INNER JOIN film USING (filmid)
-    INNER JOIN filmrating USING (filmid)
-    WHERE rank > 8 AND votes > 1000
+    ORDER BY title
 ;
---Svar: 125 rows?? Fasit sier 170.
+--Svar: 174 rows? Fasit sier 170.
+--I opgaven staar det "Hoyere rank enn 8 og mer enn 100 votes"
+--, men hvis vi skal faa et svar som er i naerheten av fasit maa jeg bruke >=.
 --Det er 161 med riktig genre + 8 filmer med HF + de top_10 = 179. Hva er galt her?
