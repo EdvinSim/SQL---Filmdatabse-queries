@@ -260,9 +260,8 @@ FROM hf
     INNER JOIN film USING (filmid)
     ORDER BY title
 ;
---Svar: 174 rows? Fasit sier 170.
+--Svar: 174 rows? Fasit sier 170. Hva er galt her?
 /*
-I oppgaven staar det "Hoyere rank enn 8 og mer enn 100 votes", men hvis
-jeg har valgt aa bruke >=.
-Det er 161 med riktig genre + 8 filmer med HF + de top_10 = 179. Hva er galt her?
+I oppgaven staar det "Hoyere rank enn 8 og mer enn 100 votes", men
+jeg har valgt aa bruke >=. Hvis ikke blir svaret 116 rows.
 */
