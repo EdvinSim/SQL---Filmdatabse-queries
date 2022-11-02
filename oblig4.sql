@@ -251,6 +251,7 @@ WITH intFilms AS (
     GROUP BY filmid
 )
 
+--Here we could also use union between the queries instead of naming them.
 SELECT title, num_of_languages
 FROM hf
     FULL OUTER JOIN cd USING (filmid)
