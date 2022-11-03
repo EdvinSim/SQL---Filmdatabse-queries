@@ -125,8 +125,7 @@ FROM (
         SELECT p1.name, p2.name, count(*) AS films_together
         FROM p AS p1
             
-            INNER JOIN p AS p2 
-                ON p1.filmid = p2.filmid
+            INNER JOIN p AS p2 ON p1.filmid = p2.filmid
                 AND p1.name != p2.name
                 AND p1.name < p2.name --This takes away duplicate pairs, because p is ordered by name alfabetically.
         GROUP BY p1.name, p2.name
@@ -210,7 +209,8 @@ WITH intFilms AS (
     SELECT filmid, rank, votes
     FROM filmrating
         INNER JOIN filmitem USING (filmid)
-    WHERE rank >= 8 AND votes >= 1000 AND filmtype = 'C'
+    WHERE rank >= 8 AND votes > 1000 AND filmtype = 'C'
+    ORDER BY rank DESC, votes DESC
 )
 
 --Films with Harrison Ford.
@@ -233,17 +233,7 @@ WITH intFilms AS (
 --Top 10 films
 , top10 AS (
     SELECT filmid
-    FROM intFilms AS fr
-        INNER JOIN (
-
-            --Distinct rank with max value
-            SELECT rank, max(votes) AS votes
-            FROM intFilms
-            GROUP BY rank
-            ORDER BY rank DESC
-
-    ) AS r ON fr.rank = r.rank AND fr.votes = r.votes
-    ORDER BY r.rank DESC
+    FROM intFilms
     LIMIT 10
 )
 
@@ -264,8 +254,4 @@ FROM hf
     INNER JOIN film USING (filmid)
     ORDER BY title
 ;
---Svar: 174 rows? Fasit sier 170. Hva er galt her?
-/*
-I oppgaven staar det "Hoyere rank enn 8 og mer enn 100 votes", men
-jeg har valgt aa bruke >=. Hvis ikke blir svaret 116 rows.
-*/
+--Svar: 170 rows.
